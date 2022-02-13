@@ -61,8 +61,7 @@ class LocalDeploymentProxy:
             if name.lower() not in excluded_headers
         ]
 
-        response = Response(resp.content, resp.status_code, headers)
-        return response
+        return Response(resp.content, resp.status_code, headers)
 
     def run(self):
         self.port = os.environ.get("PORT", 3000)
@@ -228,11 +227,7 @@ class LocalDeployTarget(DeployTarget):
             for stage, port in d.items():
                 for mv, md in self.running_models.items():
                     if port == md.port:
-                        root = (
-                            _ENDPOINT_ROOT
-                            if _ENDPOINT_ROOT
-                            else "http://localhost:" + str(self.proxy.port)
-                        )
+                        root = _ENDPOINT_ROOT or "http://localhost:" + str(self.proxy.port)
                         location = _ENDPOINT_URL_PATTERN.format(
                             root, model_name, stage
                         )

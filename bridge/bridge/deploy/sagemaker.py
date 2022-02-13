@@ -204,9 +204,7 @@ class SageMakerDeployTarget(DeployTarget):
 
         for model in models:
             if (model_name := model["ModelName"]).startswith(resource_prefix):
-                logger.info(
-                    "Removing Sagemaker Model " + f"with name {model_name}"
-                )
+                logger.info(f'Removing Sagemaker Model with name {model_name}')
                 self.sagemaker_client.delete_model(ModelName=model_name)
 
         try:
@@ -472,15 +470,14 @@ class SageMakerDeployTarget(DeployTarget):
             else:
                 matches = status_set == desired_status_set
 
-            if matches or (len(status_set) == 0):
+            if matches or not status_set:
                 break
-            else:
-                logger.info(
-                    f"Current Status Set {status_set}. "
-                    + f"Desired Set {desired_status_set}. "
-                    + f"Waiting {polling_delay}s."
-                )
-                time.sleep(polling_delay)
+            logger.info(
+                f"Current Status Set {status_set}. "
+                + f"Desired Set {desired_status_set}. "
+                + f"Waiting {polling_delay}s."
+            )
+            time.sleep(polling_delay)
 
     def _new_endpoint_config(
         self,

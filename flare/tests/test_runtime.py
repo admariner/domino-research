@@ -89,13 +89,11 @@ def generate_statistics():
         ),
     )
 
-    stats = Statistics(
+    return Statistics(
         version=0,
         dataset=Dataset(item_count=1),
         features=[float_feature, int_feature, string_feature],
     )
-
-    return stats
 
 
 @pytest.fixture()
