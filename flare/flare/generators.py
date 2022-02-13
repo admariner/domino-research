@@ -53,15 +53,13 @@ def baseline(df: pd.DataFrame):
 
 
 def gen_statistics(df: pd.DataFrame) -> Statistics:
-    statistics = Statistics(
+    return Statistics(
         dataset=Dataset(len(df)),
         features=[
             _create_statistics_feature(feature_series)
             for name, feature_series in df.iteritems()
         ],
     )
-
-    return statistics
 
 
 def gen_constraints(df: pd.DataFrame) -> Constraints:
@@ -72,9 +70,7 @@ def gen_constraints(df: pd.DataFrame) -> Constraints:
 
     monitoring_config = MonitoringConfig(DistributionConstraints())
 
-    constraints = Constraints(features, monitoring_config)
-
-    return constraints
+    return Constraints(features, monitoring_config)
 
 
 def _create_statistics_feature(feature_series: pd.Series) -> StatisticsFeature:

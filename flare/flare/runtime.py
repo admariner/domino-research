@@ -116,13 +116,12 @@ class Flare(object):
             num_missing = string_statistic.common.num_missing
 
         # Check null
-        if num_missing is not None and num_missing == 0:
-            if col.isnull().any():
-                result.append(
-                    FeatureAlert(
-                        name=col.name, kind=FeatureAlertKind.NULL.value
-                    )
+        if num_missing is not None and num_missing == 0 and col.isnull().any():
+            result.append(
+                FeatureAlert(
+                    name=col.name, kind=FeatureAlertKind.NULL.value
                 )
+            )
 
         return result
 
@@ -142,23 +141,24 @@ class Flare(object):
         result = []
         # Check non-negative
         if num_constraint := constraint.num_constraints:
-            if num_constraint.is_non_negative:
-                if (col < 0).any():
-                    result.append(
-                        FeatureAlert(
-                            name=col.name, kind=FeatureAlertKind.NEGATIVE.value
-                        )
+            if num_constraint.is_non_negative and (col < 0).any():
+                result.append(
+                    FeatureAlert(
+                        name=col.name, kind=FeatureAlertKind.NEGATIVE.value
                     )
+                )
         # Check categorical
         if string_constraint := constraint.string_constraints:
-            if len(string_constraint.domains) > 0:
-                if not col.isin(string_constraint.domains).all():
-                    result.append(
-                        FeatureAlert(
-                            name=col.name,
-                            kind=FeatureAlertKind.CATEGORICAL.value,
-                        )
+            if (
+                len(string_constraint.domains) > 0
+                and not col.isin(string_constraint.domains).all()
+            ):
+                result.append(
+                    FeatureAlert(
+                        name=col.name,
+                        kind=FeatureAlertKind.CATEGORICAL.value,
                     )
+                )
 
         # Check for type
         dtype_name = str(col.dtype)
@@ -183,9 +183,7 @@ class Flare(object):
                 )
 
         elif constraint.inferred_type == "String":
-            if not (dtype_name == "string") or (
-                dtype_name[:2] in {"<U", ">U", "=U"}
-            ):
+            if dtype_name != "string" or dtype_name[:2] in {"<U", ">U", "=U"}:
                 types = set(map(type, col.dropna()))
                 if types != {str}:
                     result.append(

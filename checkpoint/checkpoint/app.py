@@ -166,9 +166,7 @@ def create_request():
             "static_champion_version_id"
         ] = NO_VERSION_SENTINAL
 
-    app.logger.info(
-        "Create PromoteRequest with data: " + f"{promote_request_data}"
-    )
+    app.logger.info(f'Create PromoteRequest with data: {promote_request_data}')
 
     try:
         p = PromoteRequest(**promote_request_data)
@@ -177,10 +175,7 @@ def create_request():
 
         return asdict(_to_promote_request_view(p))
 
-    # TypeError is insufficient/extra parameters throws at instantiation
-    # IntegrityError is missing/null value error from the DB
-    # StatementError is an invalid enum value from the DB
-    except (TypeError, StatementError, IntegrityError) as e:
+    except (TypeError, StatementError) as e:
         app.logger.error(e)
         db_session.rollback()
         return Response(f"Invalid body: {promote_request_data}", 400)
@@ -265,17 +260,9 @@ def update_request(id: int):
     ] = candidate_stage
 
     app.logger.debug("Setting static champion version.")
-    target_stage_has_champions = (
+    if target_stage_has_champions := (
         promote_request.target_stage in STAGES_WITH_CHAMPIONS
-    )
-
-    # Static champion version
-    if not target_stage_has_champions:
-        app.logger.debug(
-            "Target stage has no champion. Setting no-version sentinal."
-        )
-        champion_version_id = NO_VERSION_SENTINAL
-    else:
+    ):
         app.logger.debug("Querying target stage for champion.")
         current_champion_version = registry.get_model_version_for_stage(
             Model(promote_request.model_name),
@@ -293,6 +280,11 @@ def update_request(id: int):
                 f"Setting champion version to v{current_champion_version.id}"
             )
 
+    else:
+        app.logger.debug(
+            "Target stage has no champion. Setting no-version sentinal."
+        )
+        champion_version_id = NO_VERSION_SENTINAL
     update_fields_and_values[
         "static_champion_version_id"
     ] = champion_version_id
@@ -323,10 +315,7 @@ def update_request(id: int):
 
         return asdict(_to_promote_request_view(promote_request))
 
-    # ValueError from invalid enum value
-    # StatementError from invalid enum at DB
-    # IntegrityError from invalid missing value at DB
-    except (ValueError, StatementError, IntegrityError) as e:
+    except (ValueError, StatementError) as e:
         app.logger.error(e)
         db_session.rollback()
         return Response(f"Invalid body: {update_fields_and_values}", 400)
@@ -459,8 +448,7 @@ def proxy(path):
     else:
         content = resp.content
 
-    response = Response(content, resp.status_code, headers)
-    return response
+    return Response(content, resp.status_code, headers)
 
 
 def _to_promote_request_view(

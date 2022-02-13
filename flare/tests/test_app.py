@@ -87,8 +87,6 @@ def fetch_constrain_feature(
     feature_name: str, constraints: Constraints
 ) -> Optional[ConstraintsFeature]:
 
-    feature: Optional[ConstraintsFeature] = next(
+    return next(
         filter(lambda x: x.name == feature_name, constraints.features)
     )
-
-    return feature

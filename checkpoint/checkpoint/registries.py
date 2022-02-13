@@ -103,7 +103,7 @@ class MlflowRegistry(Registry):
         )
 
         if len(versions) >= 1:
-            latest_version_number = max([int(v.version) for v in versions])
+            latest_version_number = max(int(v.version) for v in versions)
 
             return [
                 ModelVersion(id=str(i), model_name=model_name)
@@ -177,10 +177,9 @@ class MlflowRegistry(Registry):
     ) -> ModelVersionStage:
         if stage_name in self.MLFLOW_TO_CHECKPOINT_STAGES:
             return self.MLFLOW_TO_CHECKPOINT_STAGES[stage_name]
-        else:
-            e = ValueError(f"Recieved unexpected stage name: {stage_name}")
-            logger.error(e)
-            raise e
+        e = ValueError(f"Recieved unexpected stage name: {stage_name}")
+        logger.error(e)
+        raise e
 
     def registry_stage_for_checkpoint_stage(
         self, stage: ModelVersionStage
